@@ -1,0 +1,245 @@
+###############################################################################
+# File Name     : wordscramble_final.py
+# Author        : Basit Ali
+# Creation Date : 4-12-18
+# Description   : A program that will score the difficulty of any particular
+#                 scrambling of a word.  The scores can be not, poor, fair
+#                 or hard, depending on whether or not the scramble is not
+#                 scrambled, easy to solve, a reasonable difficulty to solve,
+#                 or hard to solve, respectively.
+###############################################################################
+
+#################################################################################################################################
+# SAMPLE INPUT & ERROR CONDITIONS:
+# Enter a list where each scrambled word is followed by a space followed by the actual word. The characters are expected to be in upper case: xxx
+# Sorry, your input was only one element. Please try again: 3333
+# Sorry, your input contained a number. Please try again: xxx 333
+# Sorry, your input contained a number. Please try again: 333 BOB BOB
+# Sorry, your input contained a number. Please try again: MAPS
+# Sorry, your input was only one element. Please try again: MAPS SPAM BOB BOB RIONY IRONY ONYRI IRONY IRONY IRONY INOYR IRONY IOYRN IRONY
+# 
+# EXPECTED OUTPUT:
+# MAPS is a hard scramble of SPAM   (as compared to "fair scramble", see edited Word document for specifics)
+# BOB is not a scramble of BOB
+# RIONY is a fair scramble of IRONY
+# ONYRI is a hard scramble of IRONY
+# IRONY is not a scramble of IRONY
+# INOYR is a fair scramble of IRONY
+# IOYRN is a fair scramble of IRONY (as compared to "poor scramble", see edited Word document for specifics)
+# Process finished with exit code 0
+#################################################################################################################################
+
+##############################################################################
+# What follows is the declaration of 3 lists that include vowels, consonants,
+# and combos. These lists are all used as checks to see if the scrambled word
+# contains any of the lists' elements written here, and is important in the
+# actual scoring of the scrambled word's difficulty.
+#############################################################################
+
+vowels = ['A', 'E', 'I', 'O', 'U', 'Y']
+consonants = ['B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Z']
+combos = ['AI', 'AY', 'EA', 'EE', 'EO', 'IO', 'OA', 'OO', 'OY', 'YA', 'YO', 'YU', 'BL', 'BR', 'CH', 'CK', 'CL', 'CR',
+          'DR', 'FL', 'FR', 'GH', 'GL', 'GR', 'KL', 'KW', 'PF', 'PL', 'PR', 'SC', 'SCH', 'SCR', 'SH', 'SHR', 'SK',
+          'SL', 'SM', 'SN', 'SP', 'SQ', 'ST', 'SW', 'TH', 'THR', 'TR', 'TW', 'WH', 'WR']
+
+scramble = input("Enter a list where each scrambled word is followed by a space followed by the actual word. The charac"
+                 "ters are expected to be in upper case: ")
+
+# The combined_list takes the input given and creates a list of each word using spaces as a delimiter.
+combined_list = scramble.split()
+numElements = len(combined_list)
+
+############################################################################
+# This while loop checks for any minor errors in the user input, such as
+# entering digits or entering only one word.
+############################################################################
+
+while True:
+    if any(j for j in combined_list if j.isdigit()):
+        scramble = input("Sorry, your input contained a number. Please try again: ")
+        combined_list = scramble.split()
+        numElements = len(combined_list)
+    elif numElements < 2:
+        scramble = input("Sorry, your input was only one element. Please try again: ")
+        combined_list = scramble.split()
+        numElements = len(combined_list)
+    else:
+        break
+
+##############################################################################
+# The oriWords list stands for "Original Words", with "ori" being used as
+# an abbreviation.
+# This list contains all of the original, unscrambled words to be used in
+# later methods.
+#
+# The scrWords list stands for "Scrambled Words", with "scr" being used as
+# an abbreviation. This list contains all of the scrambled words to be used
+# in later methods.
+##############################################################################
+
+oriWords = [y for y in combined_list[1::2]]
+scrWords = [x for x in combined_list[0::2]]
+
+############################################################################
+# Function    : notScramble
+# Parameters  : oriWord(string, the original word),
+#               scrWord(string, the scrambled word)
+# Returns     : True or False
+# Description : This function checks if the scrambled word is
+#               even scrambled compared to the actual word by making
+#               two lists of characters for both words. These lists are then
+#               checked for their equality.
+############################################################################
+
+def notScramble(oriWord, scrWord):
+    oriListed = list(oriWord)
+    scrListed = list(scrWord)
+
+    if oriListed == scrListed:
+        print(scrWord + " is not a scramble of " + oriWord)
+        return True
+    else:
+        return False
+
+##########################################################################
+# Function    : wordTest
+# Parameters  : scrWord(string, the scrambled word)
+# Returns     : True or False
+# Description : This function checks if the scrambled word
+#               is considered a real word using the given requirements.
+##########################################################################
+
+def wordTest(scrWord):
+    scrListed = list(scrWord)
+
+    # If any elements in the "combos" list appear in the scrambled word,
+    # the word is considered real.
+
+    if any(e in scrWord for e in combos):
+        #print("Combos")
+        return True
+
+    # Loop through the scrambled word's list of characters, and check to
+    # see if there are any Vowel-Consonant alternations to prove it's a real word,
+    # or see if there are any double consonants to prove it's a real word.
+
+    for i in range(len(scrListed)):
+        if scrListed[i] in vowels:
+            if scrListed[i + 1] in consonants:
+                #print("VC")
+                return True
+        elif scrListed[i] in consonants:
+            if scrListed[i + 1] == scrListed[i]:
+                #print("Double")
+                return True
+
+    #print("Not a real word")
+    return False
+
+##########################################################################
+# Function    : poorScramble
+# Parameters  : oriWord(string, the original word),
+#               scrWord(string, the scrambled word)
+# Returns     : True or False
+# Description : This function checks if the scrambled word can be considered
+#               a poor scramble of the original word using the given
+#               requirements.
+##########################################################################
+
+def poorScramble(oriWord, scrWord):
+    oriListed = list(oriWord)
+    scrListed = list(scrWord)
+
+    # Check if the first letter/element of both lists are the same,
+    # and if so, check if the scrambled word is not real to prove it's
+    # a poor scramble of the original word.
+    # If it's a real word, it cannot be a poor scramble.
+
+    if oriListed[0] == scrListed[0]:
+        if not wordTest(scrWord):
+            print(scrWord + " is a poor scramble of " + oriWord)
+            return True
+        else:
+            #print("A real word.")
+            return False
+
+    # This makes a list of tuples with each tuple containing an element from
+    # the list of original word's characters, and an element from the list of
+    # scrambled word's characters.
+
+    compareCons = list(zip(oriListed, scrListed))
+
+    # This for loop goes through each tuple and checks if the tuple's elements
+    # equal each other, and if they do, the loop proceeds to check the next tuple's elements
+    # to see if THEY equal each other, and if they do, we proceed to check if the scrambled word
+    # is not real. If all of those things end up working out, we know that the scrambled word
+    # is a poor scramble. If there are two consecutive letters but the scrambled word is not real,
+    # then the scrambled word is considered a fair scramble.
+
+    for h in range(len(compareCons)):
+        if compareCons[h][0] == compareCons[h][1]:
+            if compareCons[h + 1][0] == compareCons[h + 1][1]:
+                if not wordTest(scrWord):
+                    print(scrWord + " is a poor scramble of " + oriWord)
+                    return True
+                else:
+                    print(scrWord + " is a fair scramble of " + oriWord)
+                    return True
+
+    return False
+
+###############################################################################
+# Function    : hardScramble
+# Parameters  : oriWord(string, the original word),
+#               scrWord(string, the scrambled word)
+# Returns     : True or False
+# Description : This function checks if the scrambled word can be considered a
+#               hard scramble of the original word using the given requirements.
+###############################################################################
+
+def hardScramble(oriWord, scrWord):
+    oriListed = list(oriWord)
+    scrListed = list(scrWord)
+
+    # Goes through and compares the characters of both lists
+    # and makes sure they do not equal each other to proceed.
+    # If none of the characters of the scrambled word are in the
+    # same place as the original word, we check to see if the word
+    # is real. If it is real, then we know the scrambled word is a
+    # hard scramble of the original word.
+
+    for l in range(len(oriListed)):
+        if oriListed[l] == scrListed[l]:
+            #print("Failure")
+            return False
+        else:
+            if wordTest(scrWord):
+                print(scrWord + " is a hard scramble of " + oriWord)
+                return True
+
+##########################################################################
+# Function    : wordScrambleMain()
+# Parameters  : N/A
+# Returns     : String
+# Description : This is the main process initializer for the code that
+#               invokes all other functions for computations
+##########################################################################
+
+def wordScrambleMain():
+    #print(combined_list)
+
+    # This loop goes through the list of words and checks each method to
+    # accurately judge the scrambled word's difficulty.
+    # If all of the methods return false, then the scrambled word must be a
+    # fair scramble of the original.
+
+    for x in range(len(oriWords)):
+        if not notScramble(oriWords[x], scrWords[x]):
+            if not poorScramble(oriWords[x], scrWords[x]):
+                if not hardScramble(oriWords[x], scrWords[x]):
+                    print(scrWords[x] + " is a fair scramble of " + oriWords[x])
+
+
+if __name__ == "__main__":
+    wordScrambleMain()
+
